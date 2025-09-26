@@ -1,38 +1,38 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "include/modules.h"
-#include <string.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <float.h>
 
 int main(int argc, char *argv[]) {
-    if (argc != 3 || (argv[1][0] != '/' && argv[1][0] != '-')) {
-        printf("ERROR!\nPlease input correct arguments\n");
-        return UNEXPECTED_INPUT;
+    if (Validation(argc, argv) == INVALID_ARGUMENT) {
+        return 0;
     }
+
+    const double EPSILON = DBL_EPSILON;
     char options = argv[1][1];
-    int number = atoi(argv[2]);
+    int32_t number = atoi(argv[2]);
 
     switch (options) { 
         case 'h':
-            printf("----You choose flag h\n");
+            NaturalsDivX(number);
             break;
         case 'p':
-            printf("----You choose flag p\n");
+            IsSimple(number, EPSILON);
             break;
         case 's':
-            printf("----You choose flag s\n");
+            HexNumber(number);
             break;
         case 'e':
-            printf("----You choose flag e\n");
             Exponents(number);
             break;
         case 'a':
-            printf("----You choose flag a\n");
+            Natural(number);
             break;
         case 'f':
-            printf("----You choose flag f\n");
+            Factorial(number);
             break;
         default:
-            printf("----You didn't select flag. Try again :)\n");
+            printf("Enter the available flag\n");
             break;
     }
 
