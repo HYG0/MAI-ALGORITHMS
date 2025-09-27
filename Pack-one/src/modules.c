@@ -28,7 +28,7 @@ ReturnCode Exponents(const unsigned int number) {
         return UNEXPECTED_INPUT; 
     }
 
-    printf("Table of degrees of %d:\n", number);
+    printf("\nTable of degrees of %d:\n", number);
     for (int base = 1; base != 11; ++base) {
         printf("%-11d", base);
         for (int exp = 1; exp <= number; ++exp) {
