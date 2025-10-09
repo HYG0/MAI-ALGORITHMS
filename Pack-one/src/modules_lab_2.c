@@ -3,6 +3,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+
+uint UInt32Validation(char inpt_number[]) {
+    // Number validation
+    // Correct number is 1 <= number <= INT_MAX
+    char* ptr_end;
+    long number = strtol(inpt_number, &ptr_end, 10);
+
+    // For not fit nums func return 0
+    if (number == LONG_MAX || number > INT_MAX || number <= 0 || *ptr_end != 0) {
+        return 0;
+    }
+
+    uint correct_number = number;
+    return correct_number;
+}
 
 ReturnCode ArgValidation(int argc, char *argv[]) {
     // Args validation
@@ -11,92 +27,123 @@ ReturnCode ArgValidation(int argc, char *argv[]) {
         return INVALID_ARGUMENT;
     }
 
-    // Number validation
-    char* ptr_end;
-    long number = strtol(argv[1], &ptr_end, 10);
-    if (number == LONG_MAX || number <= 0 || *ptr_end != 0) {
+    if (UInt32Validation(argv[1]) == 0) {
         printf("Argument not fit to requirements\n"
                "Please enter 0 < int and int < 2^32\n");
         return INVALID_ARGUMENT;
     }
-    
+
     return OK; 
 }
 
-ReturnCode ScanInput(int32_t num_of_inpts) {
-    int32_t* array = (int32_t *)malloc(num_of_inpts * sizeof(int32_t));
+void* MallocCheck(u_int64_t size) {
+    // Checking the correct memory malloc
+    void* array = malloc(size);
     if (!array) {
-        printf("Allocated error!\n");
-        return ALLOCATED_ERROR;
+        printf("Allocated ERROR\n");
+        exit(1);
+        // return NULL;
     }
+    return array;
+}
 
-    int32_t max_prime_num = 0;
-    int32_t receive_num = 0;
+void* CallocCheck(size_t size, size_t elmnt_size) {
+    // Checking the correct memory calloc
+    void* array = calloc(size, elmnt_size);
+    if (!array) {
+        printf("Allocated ERROR\n");
+        exit(1);
+    }
+    return array;
+}
+
+ReturnCode ScanInput(uint num_of_inpts, uint* max_input_num, uint* input_arr) {
+    uint treated_num = 0;
+    // Scan Error overflow char at any nums
+    char receive_num[MAX_INPUT_LENGTH];
 
     for (size_t i = 0; i < num_of_inpts; ++i) {
-        scanf("%d", &receive_num);
-        if (receive_num == INT_MAX || receive_num <= 0) {
+        scanf("%10s", receive_num); 
+        treated_num = UInt32Validation(receive_num);
+        if (treated_num == 0) {
             printf("Input number doesn't fit\n");
             return INVALID_ARGUMENT;
         }
-        array[i] = receive_num;
-        max_prime_num = max_prime_num < receive_num ? receive_num : max_prime_num;
+        input_arr[i] = treated_num;
+        *max_input_num = *max_input_num < treated_num ? treated_num : *max_input_num;
     }
-    array[num_of_inpts] = max_prime_num;
 
     // Вывод содержимого массива
-    for (int a = 0; a <= num_of_inpts; ++a) {
-        printf("%d ", array[a]);
+    for (size_t a = 0; a < num_of_inpts; ++a) {
+        printf("%d ", input_arr[a]);
     }
-
-    free(array);
+    printf("\n\n");
     return OK;
 }
 
-ReturnCode PrimeNumber(int32_t num) {
+ReturnCode PrimeNumber(uint max_arr_size, uint* input_value_arr, uint size_inpt_arr) {
     // num - порядковый номер простого числа
-    int size_arr = num * 10;
-
-    int *ordinal_arr = (int *) calloc(size_arr,  sizeof(int));
-    if (ordinal_arr == NULL) {
-        printf("ERORR!\n");
-    }
-
-    ordinal_arr[0] = ordinal_arr[1] = 1;
-    int ordinal_count = 0;
+    // Conditional for upper bound prime number
+    u_int64_t upper_limit = max_arr_size * (log(max_arr_size) + log(log(max_arr_size) - 1));
     
+    printf("%lu", upper_limit);
+
+    // An array of nums with uppper bound max prime num
+    // Sieve-Array
+    uint8_t *ordinal_arr = (uint8_t *)MallocCheck(upper_limit * sizeof(uint8_t));
+    // Initialize value in array of 1
+    for (u_int64_t v = 3; v < upper_limit; v += 2) {
+        ordinal_arr[v] = 1;
+    }
+    ordinal_arr[0] = ordinal_arr[1] = 0;
+    ordinal_arr[2] = 1;
+
+    // Array of prime nums    
+    u_int64_t *prime_num_arr = (u_int64_t *)MallocCheck(max_arr_size * sizeof(u_int64_t));
+
     // Решето Эратосфена
-    for (size_t i = 2; i <= size_arr; ++i) {
-        if (!ordinal_arr[i]) {
-            for (int j = 2 * i; j <= size_arr; j += i) {
-                ordinal_arr[j] = 1;
-            }
-            ++ordinal_count;
-            printf("Count %ld\n", i);
-            if (ordinal_count == num) {
-                printf("Answer is %ld", i);
+    // 1 - Number not prime
+    // 0 - Number is prime
+    for (u_int64_t i = 3; i * i < upper_limit; i+=2) {
+        if (ordinal_arr[i]) {
+            for (u_int64_t j = i * i; j < upper_limit; j += i) {
+                ordinal_arr[j] = 0;
             }
         }
     }
-
-
-    // Вывод содержимого массива
-    for (int a = 0; a <= size_arr; ++a) {
-        printf("%d ", ordinal_arr[a]);
+    
+    printf("\n");
+    u_int64_t index = 0;    
+    for (u_int64_t k = 2; k < upper_limit; ++k) {
+        if (index >= max_arr_size) break;
+        if (ordinal_arr[k]) {
+            prime_num_arr[index] = k;
+            ++index;
+        }
     }
 
-    // Цикл поиска простого числа под порядковым номером num
-    // if (num == ordinal_count) {
-    //     printf("\n%d\n", ordinal_count);
+    // Вывод массива простых чисел
+    // for (u_int64_t a = 0; a < max_arr_size; ++a) {
+    //     printf("%ld ", prime_num_arr[a]);
     // }
 
-    // if (ordinal_arr[num] != 0) {
-    //     printf("Number %d is prime number\n", num);
-    // } else {
-    //     printf("Number %d is not prime number\n", num);
+    // Вывод решета решета-массива
+    // for (u_int64_t a = 0; a < upper_limit; ++a) {
+    //     printf("%ld - %d\n", a, ordinal_arr[a]);
     // }
+
+    // Вывод содержимого массива
+    // for (size_t a = 0; a < arr_size; ++a) {
+    //     printf("\n%d - %ld", prime_num_arr[a], a);
+    // }
+    // printf("\n");
+
+    for (u_int64_t a = 0; a < size_inpt_arr; ++a) {
+        printf("\nPrime number is %lu - The order is %u", prime_num_arr[input_value_arr[a] - 1], input_value_arr[a]);
+    }
 
     free(ordinal_arr); 
+    free(prime_num_arr);
 
     return OK;
 }

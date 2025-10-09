@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(Fund-alogos)
+project(Fund-algos)
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED True)
+set(CMAKE_C_FLAGS_DEBUG "-g -O0 -Wall -Wextra")
 
 # Settings for Task_1
 # add_library(Modules STATIC src/modules.c)
