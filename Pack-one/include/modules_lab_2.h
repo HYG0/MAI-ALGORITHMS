@@ -6,7 +6,8 @@
 #include <sys/types.h>
 #include <math.h>
 
-#define MAX_INPUT_LENGTH 11
+#define MAX_INPUT_LENGTH 10
+#define MAX_ORDINAL_PRIME 200000000
 
 typedef enum ReturnCode {
     OK,

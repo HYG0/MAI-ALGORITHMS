@@ -10,13 +10,15 @@ int main(int argc, char *argv[]) {
     uint arr_size = UInt32Validation(argv[1]);
     uint max_input_num = 0;
     uint* input_num_arr = (uint *)MallocCheck(arr_size * sizeof(uint));
+
     if (ScanInput(arr_size, &max_input_num, input_num_arr) == INVALID_ARGUMENT) {
         return 0;
     }
+    printf("Counting...\n\n");
+
     if (PrimeNumber(max_input_num, input_num_arr, arr_size) == INVALID_ARGUMENT) {
         return 0;
     }
-    printf("\n%d", max_input_num);
 
     free(input_num_arr);
 

@@ -29,7 +29,7 @@ ReturnCode ArgValidation(int argc, char *argv[]) {
 
     if (UInt32Validation(argv[1]) == 0) {
         printf("Argument not fit to requirements\n"
-               "Please enter 0 < int and int < 2^32\n");
+               "Please enter 0 < YOU_INTEGER <= 2^31\n");
         return INVALID_ARGUMENT;
     }
 
@@ -42,7 +42,6 @@ void* MallocCheck(u_int64_t size) {
     if (!array) {
         printf("Allocated ERROR\n");
         exit(1);
-        // return NULL;
     }
     return array;
 }
@@ -63,31 +62,25 @@ ReturnCode ScanInput(uint num_of_inpts, uint* max_input_num, uint* input_arr) {
     char receive_num[MAX_INPUT_LENGTH];
 
     for (size_t i = 0; i < num_of_inpts; ++i) {
-        scanf("%10s", receive_num); 
+        scanf("%9s", receive_num); 
         treated_num = UInt32Validation(receive_num);
-        if (treated_num == 0) {
-            printf("Input number doesn't fit\n");
+        if (treated_num == 0 || treated_num > MAX_ORDINAL_PRIME) {
+            printf("Input number doesn't fit\n"
+                   "Please enter 0 < YOU_INTEGER <= 200.000.000\n");
             return INVALID_ARGUMENT;
         }
         input_arr[i] = treated_num;
         *max_input_num = *max_input_num < treated_num ? treated_num : *max_input_num;
     }
 
-    // Вывод содержимого массива
-    for (size_t a = 0; a < num_of_inpts; ++a) {
-        printf("%d ", input_arr[a]);
-    }
-    printf("\n\n");
     return OK;
 }
 
 ReturnCode PrimeNumber(uint max_arr_size, uint* input_value_arr, uint size_inpt_arr) {
     // num - порядковый номер простого числа
     // Conditional for upper bound prime number
-    u_int64_t upper_limit = max_arr_size * (log(max_arr_size) + log(log(max_arr_size) - 1));
+    u_int64_t upper_limit = max_arr_size * (log(max_arr_size) + log(log(max_arr_size) - 1)) + 10;
     
-    printf("%lu", upper_limit);
-
     // An array of nums with uppper bound max prime num
     // Sieve-Array
     uint8_t *ordinal_arr = (uint8_t *)MallocCheck(upper_limit * sizeof(uint8_t));
@@ -102,8 +95,6 @@ ReturnCode PrimeNumber(uint max_arr_size, uint* input_value_arr, uint size_inpt_
     u_int64_t *prime_num_arr = (u_int64_t *)MallocCheck(max_arr_size * sizeof(u_int64_t));
 
     // Решето Эратосфена
-    // 1 - Number not prime
-    // 0 - Number is prime
     for (u_int64_t i = 3; i * i < upper_limit; i+=2) {
         if (ordinal_arr[i]) {
             for (u_int64_t j = i * i; j < upper_limit; j += i) {
@@ -112,7 +103,6 @@ ReturnCode PrimeNumber(uint max_arr_size, uint* input_value_arr, uint size_inpt_
         }
     }
     
-    printf("\n");
     u_int64_t index = 0;    
     for (u_int64_t k = 2; k < upper_limit; ++k) {
         if (index >= max_arr_size) break;
@@ -132,14 +122,8 @@ ReturnCode PrimeNumber(uint max_arr_size, uint* input_value_arr, uint size_inpt_
     //     printf("%ld - %d\n", a, ordinal_arr[a]);
     // }
 
-    // Вывод содержимого массива
-    // for (size_t a = 0; a < arr_size; ++a) {
-    //     printf("\n%d - %ld", prime_num_arr[a], a);
-    // }
-    // printf("\n");
-
     for (u_int64_t a = 0; a < size_inpt_arr; ++a) {
-        printf("\nPrime number is %lu - The order is %u", prime_num_arr[input_value_arr[a] - 1], input_value_arr[a]);
+        printf("\nPrime number is %lu - The order is %u\n", prime_num_arr[input_value_arr[a] - 1], input_value_arr[a]);
     }
 
     free(ordinal_arr); 
